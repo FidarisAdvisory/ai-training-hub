@@ -1,0 +1,1956 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Tools Training Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0a1a;
+            --bg-card: rgba(15, 15, 35, 0.8);
+            --neon-cyan: #00f5ff;
+            --neon-magenta: #ff00ff;
+            --neon-yellow: #f0ff00;
+            --neon-green: #00ff88;
+            --neon-orange: #ff6b00;
+            --neon-purple: #a855f7;
+            --neon-blue: #3b82f6;
+            --neon-pink: #ec4899;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0c0;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(0, 245, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(168, 85, 247, 0.1) 0%, transparent 60%),
+                var(--bg-dark);
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(0, 245, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 245, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+        }
+
+        @keyframes gridMove {
+            0% { transform: perspective(500px) rotateX(60deg) translateY(0); }
+            100% { transform: perspective(500px) rotateX(60deg) translateY(50px); }
+        }
+
+        /* Header */
+        .header {
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta), var(--neon-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 50px rgba(0, 245, 255, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(0, 245, 255, 0.5)); }
+            to { filter: drop-shadow(0 0 40px rgba(255, 0, 255, 0.5)); }
+        }
+
+        .subtitle {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        /* Progress Overview */
+        .progress-overview {
+            max-width: 1400px;
+            margin: 0 auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .progress-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-magenta), var(--neon-yellow), var(--neon-green));
+            animation: borderGlow 3s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .progress-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--neon-cyan);
+        }
+
+        .progress-stats {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--neon-green);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .main-progress-bar {
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .main-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-green));
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .main-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* Navigation */
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto 2rem;
+            padding: 0 2rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-tab {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 1rem 2rem;
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .nav-tab:hover {
+            background: rgba(0, 245, 255, 0.1);
+            border-color: var(--neon-cyan);
+            color: var(--neon-cyan);
+            transform: translateY(-2px);
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border-color: var(--neon-cyan);
+            color: var(--text-primary);
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tool Cards */
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.05));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .tool-card.chatgpt { border-top: 3px solid #10A37F; }
+        .tool-card.gemini { border-top: 3px solid #4285F4; }
+        .tool-card.claude { border-top: 3px solid #a855f7; }
+        .tool-card.perplexity { border-top: 3px solid #20B2AA; }
+        .tool-card.notebooklm { border-top: 3px solid #FF6D01; }
+
+        .tool-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-card.chatgpt .tool-icon { background: rgba(16, 163, 127, 0.2); color: #10A37F; }
+        .tool-card.gemini .tool-icon { background: rgba(66, 133, 244, 0.2); color: #4285F4; }
+        .tool-card.claude .tool-icon { background: rgba(168, 85, 247, 0.2); color: #a855f7; }
+        .tool-card.perplexity .tool-icon { background: rgba(32, 178, 170, 0.2); color: #20B2AA; }
+        .tool-card.notebooklm .tool-icon { background: rgba(255, 109, 1, 0.2); color: #FF6D01; }
+
+        .tool-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .tool-progress {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .tool-progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+
+        .tool-card.chatgpt .tool-progress-fill { background: #10A37F; }
+        .tool-card.gemini .tool-progress-fill { background: #4285F4; }
+        .tool-card.claude .tool-progress-fill { background: #a855f7; }
+        .tool-card.perplexity .tool-progress-fill { background: #20B2AA; }
+        .tool-card.notebooklm .tool-progress-fill { background: #FF6D01; }
+
+        /* Exercise Cards */
+        .exercise-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exercise-card.completed {
+            border-color: var(--neon-green);
+        }
+
+        .exercise-card.completed::after {
+            content: '✓ COMPLETED';
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--neon-green);
+            color: var(--bg-dark);
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .exercise-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .exercise-number {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .exercise-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.3rem;
+        }
+
+        .exercise-meta {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .meta-icon {
+            font-size: 1.1rem;
+        }
+
+        .exercise-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        .exercise-content h4 {
+            color: var(--text-primary);
+            margin: 1.5rem 0 0.5rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+        }
+
+        .exercise-content ol, .exercise-content ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .exercise-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .exercise-btn {
+            margin-top: 1.5rem;
+            padding: 1rem 2rem;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .exercise-btn.start {
+            background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue));
+            color: var(--bg-dark);
+        }
+
+        .exercise-btn.start:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+        }
+
+        .exercise-btn.complete {
+            background: linear-gradient(135deg, var(--neon-green), #00cc6a);
+            color: var(--bg-dark);
+        }
+
+        .exercise-btn.complete:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+        }
+
+        .exercise-btn.reset {
+            background: transparent;
+            border: 2px solid var(--text-secondary);
+            color: var(--text-secondary);
+        }
+
+        .exercise-btn.reset:hover {
+            border-color: var(--neon-orange);
+            color: var(--neon-orange);
+        }
+
+        /* Code Block */
+        .code-block {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+
+        /* Prompt Example */
+        .prompt-example {
+            background: linear-gradient(135deg, rgba(168, 85, 247, 0.1), rgba(0, 245, 255, 0.1));
+            border-left: 4px solid var(--neon-purple);
+            border-radius: 0 10px 10px 0;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .prompt-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--neon-purple);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .prompt-text {
+            font-style: italic;
+            line-height: 1.7;
+        }
+
+        /* Tip Box */
+        .tip-box {
+            background: rgba(0, 255, 136, 0.1);
+            border-left: 4px solid var(--neon-green);
+            border-radius: 0 10px 10px 0;
+            padding: 1rem 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .tip-box.warning {
+            background: rgba(255, 107, 0, 0.1);
+            border-color: var(--neon-orange);
+        }
+
+        .tip-label {
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        /* Settings Table */
+        .settings-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        .settings-table th, .settings-table td {
+            padding: 1rem;
+            text-align: left;
+            border: 1px solid var(--glass-border);
+        }
+
+        .settings-table th {
+            background: rgba(0, 245, 255, 0.1);
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            color: var(--neon-cyan);
+        }
+
+        .settings-table td:first-child {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: var(--neon-magenta);
+        }
+
+        /* Achievements */
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .achievement {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+        }
+
+        .achievement.unlocked {
+            opacity: 1;
+            border-color: var(--neon-yellow);
+            box-shadow: 0 0 20px rgba(240, 255, 0, 0.2);
+        }
+
+        .achievement-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .achievement-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .achievement-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2rem;
+            }
+
+            .nav-tab {
+                padding: 0.8rem 1.2rem;
+                font-size: 0.9rem;
+            }
+
+            .progress-stats {
+                gap: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--neon-cyan);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-magenta);
+        }
+
+        /* Confetti animation */
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            animation: confetti-fall 3s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <h1 class="logo">AI TRAINING HUB</h1>
+        <p class="subtitle">Master the Future of AI Tools</p>
+    </header>
+
+    <!-- Progress Overview -->
+    <div class="progress-overview">
+        <div class="progress-card">
+            <div class="progress-header">
+                <h2 class="progress-title">YOUR MISSION PROGRESS</h2>
+                <div class="progress-stats">
+                    <div class="stat">
+                        <div class="stat-value" id="completedCount">0</div>
+                        <div class="stat-label">Completed</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="totalCount">18</div>
+                        <div class="stat-label">Total Missions</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value" id="percentComplete">0%</div>
+                        <div class="stat-label">Progress</div>
+                    </div>
+                </div>
+            </div>
+            <div class="main-progress-bar">
+                <div class="main-progress-fill" id="mainProgressFill" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="nav-container">
+        <div class="nav-tabs">
+            <button class="nav-tab active" data-section="overview">Overview</button>
+            <button class="nav-tab" data-section="personalization">Personalization</button>
+            <button class="nav-tab" data-section="prompting">Prompting</button>
+            <button class="nav-tab" data-section="metaprompts">Meta-Prompts</button>
+            <button class="nav-tab" data-section="achievements">Achievements</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Overview Section -->
+        <section id="overview" class="section active">
+            <h2 style="font-family: 'Orbitron', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--neon-cyan);">
+                🚀 SELECT YOUR TRAINING MODULE
+            </h2>
+
+            <div class="tools-grid">
+                <div class="tool-card chatgpt" onclick="showToolModal('chatgpt')">
+                    <div class="tool-icon">🤖</div>
+                    <h3 class="tool-name">ChatGPT</h3>
+                    <p class="tool-desc">Master Custom Instructions & Memory features</p>
+                    <div class="tool-progress">
+                        <div class="tool-progress-fill" id="progress-chatgpt" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="tool-card gemini" onclick="showToolModal('gemini')">
+                    <div class="tool-icon">✨</div>
+                    <h3 class="tool-name">Gemini</h3>
+                    <p class="tool-desc">Extensions, Gems & Google Integration</p>
+                    <div class="tool-progress">
+                        <div class="tool-progress-fill" id="progress-gemini" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="tool-card claude" onclick="showToolModal('claude')">
+                    <div class="tool-icon">🎭</div>
+                    <h3 class="tool-name">Claude</h3>
+                    <p class="tool-desc">Projects, Knowledge Files & Analysis</p>
+                    <div class="tool-progress">
+                        <div class="tool-progress-fill" id="progress-claude" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="tool-card perplexity" onclick="showToolModal('perplexity')">
+                    <div class="tool-icon">🔍</div>
+                    <h3 class="tool-name">Perplexity</h3>
+                    <p class="tool-desc">AI Profile, Search & Research Spaces</p>
+                    <div class="tool-progress">
+                        <div class="tool-progress-fill" id="progress-perplexity" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="tool-card notebooklm" onclick="showToolModal('notebooklm')">
+                    <div class="tool-icon">📓</div>
+                    <h3 class="tool-name">NotebookLM</h3>
+                    <p class="tool-desc">Document Intelligence & Audio Summaries</p>
+                    <div class="tool-progress">
+                        <div class="tool-progress-fill" id="progress-notebooklm" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="font-family: 'Orbitron', sans-serif; font-size: 1.5rem; margin: 2rem 0 1rem; color: var(--neon-magenta);">
+                📊 QUICK STATS
+            </h2>
+
+            <div class="tools-grid">
+                <div class="exercise-card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎯</div>
+                    <h3 style="font-family: 'Orbitron'; color: var(--neon-cyan);">5 Tools</h3>
+                    <p style="color: var(--text-secondary);">AI assistants to master</p>
+                </div>
+                <div class="exercise-card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🧪</div>
+                    <h3 style="font-family: 'Orbitron'; color: var(--neon-green);">3 Exercises</h3>
+                    <p style="color: var(--text-secondary);">Prompting challenges</p>
+                </div>
+                <div class="exercise-card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🧠</div>
+                    <h3 style="font-family: 'Orbitron'; color: var(--neon-purple);">Meta-Prompts</h3>
+                    <p style="color: var(--text-secondary);">Advanced techniques</p>
+                </div>
+                <div class="exercise-card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🏆</div>
+                    <h3 style="font-family: 'Orbitron'; color: var(--neon-yellow);">8 Badges</h3>
+                    <p style="color: var(--text-secondary);">Achievements to unlock</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Personalization Section -->
+        <section id="personalization" class="section">
+            <h2 style="font-family: 'Orbitron', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--neon-cyan);">
+                ⚙️ TOOL PERSONALIZATION
+            </h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;">
+                Configure each tool to match your workflow. Taking 10-15 minutes to set up personalization saves hours of repetitive instructions.
+            </p>
+
+            <!-- ChatGPT Personalization -->
+            <div class="exercise-card" id="exercise-chatgpt-personal">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: rgba(16, 163, 127, 0.2); color: #10A37F;">1</div>
+                    <h3 class="exercise-title">ChatGPT Personalization</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 15 minutes</span>
+                    <span class="meta-item"><span class="meta-icon">🎯</span> Custom Instructions & Memory</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>📍 How to Access:</h4>
+                    <ol>
+                        <li>Click your profile icon (bottom-left corner)</li>
+                        <li>Select "Settings"</li>
+                        <li>Navigate to "Personalization"</li>
+                    </ol>
+
+                    <h4>📝 Custom Instructions Setup:</h4>
+                    <p><strong>Box 1 - "What would you like ChatGPT to know about you?"</strong></p>
+                    <div class="prompt-example">
+                        <div class="prompt-label">Example Entry</div>
+                        <div class="prompt-text">I'm a marketing manager at a B2B SaaS company. I work primarily on content marketing, email campaigns, and lead generation. Our target audience is mid-market companies (100-1000 employees) in the healthcare and finance sectors. I'm proficient with HubSpot, Google Analytics, and basic SQL. I prefer data-driven approaches.</div>
+                    </div>
+
+                    <p><strong>Box 2 - "How would you like ChatGPT to respond?"</strong></p>
+                    <div class="prompt-example">
+                        <div class="prompt-label">Example Entry</div>
+                        <div class="prompt-text">Be concise and actionable—lead with the key insight. Use bullet points for lists of 3+ items. Match a professional but approachable tone. Skip basic explanations unless I ask. If uncertain, say so rather than guessing. Suggest metrics to measure success when relevant.</div>
+                    </div>
+
+                    <h4>🧠 Memory Feature:</h4>
+                    <ul>
+                        <li>Say "Remember that I prefer..." to save preferences</li>
+                        <li>View/delete memories in Settings > Personalization > Memory</li>
+                        <li>Periodically review for outdated information</li>
+                    </ul>
+
+                    <div class="tip-box">
+                        <div class="tip-label">💡 Pro Tip</div>
+                        Your Custom Instructions apply to ALL conversations. Be specific but not too restrictive.
+                    </div>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('chatgpt-personal')">Mark Complete</button>
+            </div>
+
+            <!-- Gemini Personalization -->
+            <div class="exercise-card" id="exercise-gemini-personal">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: rgba(66, 133, 244, 0.2); color: #4285F4;">2</div>
+                    <h3 class="exercise-title">Gemini Personalization</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 20 minutes</span>
+                    <span class="meta-item"><span class="meta-icon">🎯</span> Extensions & Gems</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>📍 How to Access:</h4>
+                    <ol>
+                        <li>Go to gemini.google.com</li>
+                        <li>Click Settings gear icon (top right)</li>
+                        <li>Find Extensions and Connected apps</li>
+                    </ol>
+
+                    <h4>🔌 Extensions to Enable:</h4>
+                    <table class="settings-table">
+                        <tr><th>Extension</th><th>Use Case</th></tr>
+                        <tr><td>Google Workspace</td><td>Search Gmail, Docs, Drive, Calendar</td></tr>
+                        <tr><td>Google Flights</td><td>Travel planning assistance</td></tr>
+                        <tr><td>Google Maps</td><td>Location and directions queries</td></tr>
+                        <tr><td>YouTube</td><td>Search and summarize video content</td></tr>
+                    </table>
+
+                    <div class="tip-box">
+                        <div class="tip-label">💡 Pro Tip</div>
+                        Use @Gmail, @Drive, or @Docs in prompts to specify which service to search.
+                    </div>
+
+                    <h4>💎 Creating Gems (Custom Versions):</h4>
+                    <ol>
+                        <li>Click "Gem manager" in sidebar</li>
+                        <li>Click "New Gem"</li>
+                        <li>Name it and add detailed instructions</li>
+                        <li>Save for quick access anytime</li>
+                    </ol>
+
+                    <div class="prompt-example">
+                        <div class="prompt-label">Starter Prompt (Use at conversation start)</div>
+                        <div class="prompt-text">I'm a financial analyst preparing quarterly reports. I need precise numbers, clear explanations for executives, and outputs formatted for PowerPoint. Always cite sources for market data. Keep responses concise unless I ask for detail.</div>
+                    </div>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('gemini-personal')">Mark Complete</button>
+            </div>
+
+            <!-- Claude Personalization -->
+            <div class="exercise-card" id="exercise-claude-personal">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: rgba(168, 85, 247, 0.2); color: #a855f7;">3</div>
+                    <h3 class="exercise-title">Claude Personalization</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 20 minutes</span>
+                    <span class="meta-icon">🎯</span> Projects & Knowledge Files</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>📍 Understanding Claude's Approach:</h4>
+                    <p>Claude uses <strong>Projects</strong> instead of global custom instructions. Each Project can have its own context and knowledge files.</p>
+
+                    <h4>🏗️ Creating a Personalized Project:</h4>
+                    <ol>
+                        <li>Click "Projects" in the sidebar</li>
+                        <li>Click "Create Project"</li>
+                        <li>Name it (e.g., "Work Assistant")</li>
+                        <li>Add Project Instructions (your system prompt)</li>
+                        <li>Upload files to Project Knowledge</li>
+                    </ol>
+
+                    <div class="prompt-example">
+                        <div class="prompt-label">Project Instructions Example</div>
+                        <div class="prompt-text">You are my professional writing assistant. I work as a consultant specializing in digital transformation for retail companies.
+
+When helping with client deliverables:
+- Use a professional, authoritative tone
+- Structure with clear headers
+- Include actionable next steps
+- Reference industry best practices
+- Default to executive-summary style
+
+My clients are VP-level or C-suite, so avoid jargon and focus on business outcomes.</div>
+                    </div>
+
+                    <h4>📚 Uploading Knowledge Files:</h4>
+                    <ul>
+                        <li>Upload company guidelines, templates, past deliverables</li>
+                        <li>Claude references these automatically when relevant</li>
+                        <li>Mention specific files: "Based on the brand guidelines I uploaded..."</li>
+                    </ul>
+
+                    <div class="tip-box">
+                        <div class="tip-label">💡 Pro Tip</div>
+                        Create separate Projects for different work streams. A "Client Proposals" project and "Internal Docs" project keeps context clean.
+                    </div>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('claude-personal')">Mark Complete</button>
+            </div>
+
+            <!-- Perplexity Personalization -->
+            <div class="exercise-card" id="exercise-perplexity-personal">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: rgba(32, 178, 170, 0.2); color: #20B2AA;">4</div>
+                    <h3 class="exercise-title">Perplexity Personalization</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 15 minutes</span>
+                    <span class="meta-icon">🎯</span> AI Profile & Collections</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>📍 How to Access:</h4>
+                    <ol>
+                        <li>Click your profile icon or Settings</li>
+                        <li>Find "Profile" and "AI Profile" sections</li>
+                    </ol>
+
+                    <div class="prompt-example">
+                        <div class="prompt-label">AI Profile Example</div>
+                        <div class="prompt-text">I'm a product manager in the fintech industry. I research competitor features, market trends, and UX best practices. I prefer recent sources (last 2 years) and value academic research and industry reports over blog posts. I need citable information for business documents.</div>
+                    </div>
+
+                    <h4>⚙️ Search Preferences:</h4>
+                    <table class="settings-table">
+                        <tr><th>Setting</th><th>Options</th></tr>
+                        <tr><td>Default Focus</td><td>All, Academic, Writing, YouTube, Reddit</td></tr>
+                        <tr><td>Output Language</td><td>Your preferred language</td></tr>
+                        <tr><td>AI Model</td><td>GPT-4, Claude (Pro users)</td></tr>
+                        <tr><td>Copilot Mode</td><td>Enable for guided research</td></tr>
+                    </table>
+
+                    <h4>📁 Collections for Organization:</h4>
+                    <ul>
+                        <li>After a search, click "Add to Collection"</li>
+                        <li>Create themed collections ("Competitor Research", "Industry Trends")</li>
+                        <li>Access from your Library for context in follow-ups</li>
+                    </ul>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('perplexity-personal')">Mark Complete</button>
+            </div>
+
+            <!-- NotebookLM Personalization -->
+            <div class="exercise-card" id="exercise-notebooklm-personal">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: rgba(255, 109, 1, 0.2); color: #FF6D01;">5</div>
+                    <h3 class="exercise-title">NotebookLM Personalization</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 15 minutes</span>
+                    <span class="meta-icon">🎯</span> Notebook Strategy & Sources</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>💡 Key Insight:</h4>
+                    <p>NotebookLM is personalized by what you upload. It <strong>only knows</strong> your uploaded documents—making it perfect for focused, specific work.</p>
+
+                    <h4>📚 Notebook Organization Strategy:</h4>
+                    <table class="settings-table">
+                        <tr><th>Notebook Type</th><th>Purpose</th></tr>
+                        <tr><td>Project Notebooks</td><td>All docs for one major project</td></tr>
+                        <tr><td>Topic Notebooks</td><td>Deep research on specific subjects</td></tr>
+                        <tr><td>Learning Notebooks</td><td>Course materials, study guides</td></tr>
+                        <tr><td>Reference Notebooks</td><td>Policies, templates you reference often</td></tr>
+                    </table>
+
+                    <h4>📎 Source Types You Can Upload:</h4>
+                    <ul>
+                        <li>Google Docs (direct connection)</li>
+                        <li>PDFs, Text files, Markdown</li>
+                        <li>Web URLs (imports content)</li>
+                        <li>YouTube URLs (imports transcripts)</li>
+                        <li>Google Slides</li>
+                    </ul>
+
+                    <div class="tip-box warning">
+                        <div class="tip-label">⚠️ Important</div>
+                        NotebookLM works best with 3-10 focused sources. Too many sources dilute response specificity.
+                    </div>
+
+                    <h4>🎧 Audio Overview Tips:</h4>
+                    <ul>
+                        <li>Select specific sources to include (not all)</li>
+                        <li>Fewer, focused sources = better audio</li>
+                        <li>Regenerate with different combinations if needed</li>
+                    </ul>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('notebooklm-personal')">Mark Complete</button>
+            </div>
+        </section>
+
+        <!-- Prompting Section -->
+        <section id="prompting" class="section">
+            <h2 style="font-family: 'Orbitron', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--neon-green);">
+                ✍️ PROMPTING EXERCISES
+            </h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;">
+                Master the art of communicating with AI. These exercises build foundational skills you'll use every day.
+            </p>
+
+            <!-- Anatomy of a Prompt -->
+            <div class="exercise-card" style="border-top: 3px solid var(--neon-cyan);">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: rgba(0, 245, 255, 0.2); color: var(--neon-cyan);">📖</div>
+                    <h3 class="exercise-title">The Anatomy of an Effective Prompt</h3>
+                </div>
+                <div class="exercise-content">
+                    <table class="settings-table">
+                        <tr><th>Element</th><th>Description</th></tr>
+                        <tr><td>Role</td><td>Who should the AI pretend to be? ("Act as a senior editor...")</td></tr>
+                        <tr><td>Context</td><td>Background information needed to understand the task</td></tr>
+                        <tr><td>Task</td><td>The specific thing you want done</td></tr>
+                        <tr><td>Format</td><td>How the output should be structured</td></tr>
+                        <tr><td>Constraints</td><td>Limitations, requirements, things to avoid</td></tr>
+                        <tr><td>Examples</td><td>Samples of what good output looks like</td></tr>
+                        <tr><td>Tone</td><td>The voice or style to use</td></tr>
+                    </table>
+
+                    <h4>❌ Weak vs ✅ Strong:</h4>
+                    <div class="prompt-example" style="border-left-color: var(--neon-orange);">
+                        <div class="prompt-label" style="color: var(--neon-orange);">❌ Weak Prompt</div>
+                        <div class="prompt-text">Write about marketing.</div>
+                    </div>
+                    <div class="prompt-example" style="border-left-color: var(--neon-green);">
+                        <div class="prompt-label" style="color: var(--neon-green);">✅ Strong Prompt</div>
+                        <div class="prompt-text">Act as a B2B marketing strategist. Write a 500-word blog post explaining three cost-effective lead generation tactics for SaaS startups with limited budgets. Use a professional but approachable tone. Include specific examples and estimated costs for each tactic. End with a clear call-to-action.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exercise 1: RCT Framework -->
+            <div class="exercise-card" id="exercise-prompting-1">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: linear-gradient(135deg, var(--neon-cyan), var(--neon-blue)); color: var(--bg-dark);">1</div>
+                    <h3 class="exercise-title">The Role-Context-Task Framework</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 20 minutes</span>
+                    <span class="meta-item"><span class="meta-icon">🛠️</span> Any AI Tool</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>The Framework:</h4>
+                    <ol>
+                        <li><strong>Role:</strong> Define who the AI should be</li>
+                        <li><strong>Context:</strong> Provide necessary background</li>
+                        <li><strong>Task:</strong> Specify exactly what you want</li>
+                    </ol>
+
+                    <h4>🎯 Your Challenge:</h4>
+                    <p>Create prompts for each scenario using RCT:</p>
+
+                    <div class="prompt-example">
+                        <div class="prompt-label">Scenario A: Explain a technical concept</div>
+                        <div class="prompt-text">[Role] Act as a technical communications specialist who excels at making complex topics accessible.
+
+[Context] I need to explain [CONCEPT] to [AUDIENCE] who have [BACKGROUND].
+
+[Task] Create an explanation that uses analogies, avoids jargon, and takes no more than 2 minutes to read.</div>
+                    </div>
+
+                    <div class="prompt-example">
+                        <div class="prompt-label">Scenario B: Get feedback on writing</div>
+                        <div class="prompt-text">[Role] Act as a senior editor at a business publication.
+
+[Context] I've written a [TYPE] for [AUDIENCE]. The goal is [OBJECTIVE].
+
+[Task] Review and provide: (1) Overall assessment, (2) Three specific improvements, (3) Any unclear sentences.</div>
+                    </div>
+
+                    <h4>📋 Steps to Complete:</h4>
+                    <ol>
+                        <li>Choose one scenario above</li>
+                        <li>Fill in the template with a real situation</li>
+                        <li>Submit to an AI tool and evaluate</li>
+                        <li>Refine based on what was missing</li>
+                        <li>Compare the refined output to original</li>
+                    </ol>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('prompting-1')">Mark Complete</button>
+            </div>
+
+            <!-- Exercise 2: Iterative Refinement -->
+            <div class="exercise-card" id="exercise-prompting-2">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: linear-gradient(135deg, var(--neon-green), #00cc6a); color: var(--bg-dark);">2</div>
+                    <h3 class="exercise-title">Iterative Refinement</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 25 minutes</span>
+                    <span class="meta-item"><span class="meta-icon">🛠️</span> ChatGPT or Claude</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>💡 Key Insight:</h4>
+                    <p>Your first prompt rarely produces perfection. The real skill is guiding the AI through follow-up prompts.</p>
+
+                    <h4>🔄 Refinement Strategies:</h4>
+                    <table class="settings-table">
+                        <tr><th>Strategy</th><th>Example Phrases</th></tr>
+                        <tr><td>Adjust scope</td><td>"Make this more concise" / "Expand point #2"</td></tr>
+                        <tr><td>Change tone</td><td>"More formal" / "Add warmth"</td></tr>
+                        <tr><td>Add constraints</td><td>"Limit to 200 words" / "Remove jargon"</td></tr>
+                        <tr><td>Format change</td><td>"Convert to bullets" / "Present as table"</td></tr>
+                        <tr><td>Focus attention</td><td>"Paragraph 2 is good—match the rest to it"</td></tr>
+                    </table>
+
+                    <h4>🎯 Your Challenge:</h4>
+                    <ol>
+                        <li><strong>Start:</strong> "Write an email announcing a new project management tool we're adopting."</li>
+                        <li><strong>Refine 1:</strong> "Make it more enthusiastic without being cheesy. Add a specific example of time saved."</li>
+                        <li><strong>Refine 2:</strong> "Add: (1) when training is available, (2) who to contact with questions, (3) deadline for setup."</li>
+                        <li><strong>Refine 3:</strong> "Perfect. Now shorten by 30% while keeping all key information."</li>
+                    </ol>
+
+                    <div class="tip-box">
+                        <div class="tip-label">💡 Pro Tip</div>
+                        Save your successful refinement sequences. They become templates for similar future tasks.
+                    </div>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('prompting-2')">Mark Complete</button>
+            </div>
+
+            <!-- Exercise 3: Chain of Thought -->
+            <div class="exercise-card" id="exercise-prompting-3">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: linear-gradient(135deg, var(--neon-purple), var(--neon-pink)); color: white;">3</div>
+                    <h3 class="exercise-title">Chain-of-Thought Prompting</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 20 minutes</span>
+                    <span class="meta-item"><span class="meta-icon">🛠️</span> Claude (best) or ChatGPT</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>🧠 What is Chain-of-Thought?</h4>
+                    <p>Asking the AI to show its reasoning step-by-step before giving a final answer. This produces more accurate, thoughtful responses for complex problems.</p>
+
+                    <h4>Magic Phrases:</h4>
+                    <ul>
+                        <li>"Think through this step by step before answering."</li>
+                        <li>"Explain your reasoning as you work through this."</li>
+                        <li>"Before giving your recommendation, list the factors you're considering."</li>
+                    </ul>
+
+                    <div class="prompt-example" style="border-left-color: var(--neon-orange);">
+                        <div class="prompt-label" style="color: var(--neon-orange);">Without Chain-of-Thought</div>
+                        <div class="prompt-text">Should we expand into the European market?</div>
+                    </div>
+
+                    <div class="prompt-example" style="border-left-color: var(--neon-green);">
+                        <div class="prompt-label" style="color: var(--neon-green);">With Chain-of-Thought</div>
+                        <div class="prompt-text">I'm considering whether our company should expand into the European market. Before giving a recommendation, please:
+
+1. List the key factors that determine international expansion success
+2. Identify what information you would need
+3. Discuss major risks and mitigations
+4. Then provide your recommendation with reasoning
+
+Think through this systematically.</div>
+                    </div>
+
+                    <h4>🎯 Your Challenge:</h4>
+                    <ol>
+                        <li>Choose a complex decision you need help with</li>
+                        <li>Ask the question directly (without CoT)</li>
+                        <li>Note the response quality</li>
+                        <li>Reframe with chain-of-thought instructions</li>
+                        <li>Compare depth, analysis quality, and reasoning</li>
+                    </ol>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('prompting-3')">Mark Complete</button>
+            </div>
+        </section>
+
+        <!-- Meta-Prompts Section -->
+        <section id="metaprompts" class="section">
+            <h2 style="font-family: 'Orbitron', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--neon-magenta);">
+                🧠 META-PROMPTS
+            </h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;">
+                The most powerful advanced technique: prompts that create other prompts. Master this and you'll never struggle with prompting again.
+            </p>
+
+            <!-- What is a Meta-Prompt -->
+            <div class="exercise-card" style="border-top: 3px solid var(--neon-magenta);">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: rgba(255, 0, 255, 0.2); color: var(--neon-magenta);">💡</div>
+                    <h3 class="exercise-title">What is a Meta-Prompt?</h3>
+                </div>
+                <div class="exercise-content">
+                    <p style="font-size: 1.2rem; margin-bottom: 1rem;">A <strong>meta-prompt</strong> is a prompt that generates other prompts. Instead of writing the perfect prompt yourself, you ask the AI to help create it.</p>
+
+                    <h4>The Concept:</h4>
+                    <ul>
+                        <li><strong>Regular prompt:</strong> "Write a marketing email for our new product."</li>
+                        <li><strong>Meta-prompt:</strong> "Help me write the perfect prompt for generating a marketing email. Ask me the questions you need to create an effective prompt."</li>
+                    </ul>
+
+                    <div class="prompt-example">
+                        <div class="prompt-label">Simple Meta-Prompt Example</div>
+                        <div class="prompt-text">I want to write a prompt that will help me create effective cold outreach emails. Before I write this prompt, I need your help making it as effective as possible.
+
+Please:
+1. Ask me 5-7 questions about my specific situation, audience, and goals
+2. Based on my answers, write an optimized prompt I can use repeatedly
+3. Explain why you included each element in the prompt</div>
+                    </div>
+
+                    <p>The AI will ask clarifying questions, and once you answer, it constructs a detailed, customized prompt for your specific needs.</p>
+                </div>
+            </div>
+
+            <!-- Why Meta-Prompts Matter -->
+            <div class="exercise-card" style="border-top: 3px solid var(--neon-yellow);">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: rgba(240, 255, 0, 0.2); color: var(--neon-yellow);">⚡</div>
+                    <h3 class="exercise-title">Why Meta-Prompts Matter</h3>
+                </div>
+                <div class="exercise-content">
+                    <table class="settings-table">
+                        <tr><th>Benefit</th><th>Why It Helps</th></tr>
+                        <tr><td>Better prompts than you'd write alone</td><td>The AI knows what information it needs to perform well</td></tr>
+                        <tr><td>Discover blind spots</td><td>AI questions reveal context you didn't think to include</td></tr>
+                        <tr><td>Reusable templates</td><td>Create prompts you can use repeatedly with minor adjustments</td></tr>
+                        <tr><td>Learn prompting</td><td>See what the AI includes to learn what makes prompts effective</td></tr>
+                        <tr><td>Save time</td><td>A few minutes creating a meta-prompt saves hours of iteration</td></tr>
+                    </table>
+
+                    <h4>When to Use Meta-Prompts:</h4>
+                    <ul>
+                        <li>You'll use the prompt multiple times (templates, recurring tasks)</li>
+                        <li>The task is complex and you're unsure what context to provide</li>
+                        <li>You want to maximize quality for an important deliverable</li>
+                        <li>You're learning what makes prompts effective for a new task type</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- The Key Insight -->
+            <div class="exercise-card" style="border-top: 3px solid var(--neon-green); background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), rgba(0, 245, 255, 0.05));">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: var(--neon-green); color: var(--bg-dark);">🔑</div>
+                    <h3 class="exercise-title">KEY INSIGHT: Use the AI to Create Its Own Meta-Prompt</h3>
+                </div>
+                <div class="exercise-content">
+                    <div class="tip-box warning" style="font-size: 1.1rem;">
+                        <div class="tip-label">⚡ The Power Move</div>
+                        You can use the SAME AI tool to create the meta-prompt itself. The AI knows what information it needs to perform well!
+                    </div>
+
+                    <h4>If you're not sure how to write a meta-prompt, just ask:</h4>
+
+                    <div class="prompt-example">
+                        <div class="prompt-label">Level 1 - Basic Request</div>
+                        <div class="prompt-text">I frequently need to write [TYPE OF CONTENT]. Create a meta-prompt I can use to generate optimized prompts for this type of task. The meta-prompt should ask me all the right questions to produce excellent results.</div>
+                    </div>
+
+                    <div class="prompt-example">
+                        <div class="prompt-label">Level 2 - More Specific</div>
+                        <div class="prompt-text">I'm a [ROLE] who regularly needs to [TASK]. I want to create a reusable meta-prompt that will help me generate great prompts for this task every time.
+
+Create a meta-prompt that:
+1. Asks the essential questions needed for this type of task
+2. Includes instructions for how you should format the final prompt
+3. Can be used repeatedly with different projects
+
+Make the meta-prompt comprehensive but not overwhelming.</div>
+                    </div>
+
+                    <h4>🔄 The Self-Referential Loop:</h4>
+                    <ol>
+                        <li>You ask the AI to create a meta-prompt</li>
+                        <li>The AI creates a prompt template with questions</li>
+                        <li>You fill in the template for your specific task</li>
+                        <li>The AI generates the perfect task-specific prompt</li>
+                        <li>You use that prompt to get your final output</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Meta-Prompt Templates -->
+            <div class="exercise-card" id="exercise-meta-templates">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: linear-gradient(135deg, var(--neon-cyan), var(--neon-magenta)); color: white;">📋</div>
+                    <h3 class="exercise-title">Meta-Prompt Templates</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">🎯</span> Ready-to-use templates</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>Template 1: Content Creation</h4>
+                    <div class="code-block">I need to create [TYPE OF CONTENT]. Before writing a prompt, please ask me about:
+
+1. Target audience and their knowledge level
+2. Primary goal (inform, persuade, entertain, etc.)
+3. Key points that must be covered
+4. Tone and style preferences
+5. Length and format requirements
+6. Examples of content I like
+7. SEO keywords (if applicable)
+8. Call-to-action needed
+
+After I answer, create a comprehensive prompt that will generate high-quality content meeting all specifications.</div>
+
+                    <h4>Template 2: Analysis</h4>
+                    <div class="code-block">I need help analyzing [TOPIC/DATA]. Before creating the analysis prompt, ask me about:
+
+1. What question am I trying to answer?
+2. What data or information do I have?
+3. Who will use this analysis and for what?
+4. What format should the analysis take?
+5. Specific frameworks or methodologies to use?
+6. What would make this analysis actionable?
+7. Deadline and depth required?
+
+Then create a prompt for thorough, useful analysis.</div>
+
+                    <h4>Template 3: Problem-Solving</h4>
+                    <div class="code-block">I'm trying to solve [PROBLEM/MAKE DECISION]. Before creating a prompt, ask about:
+
+1. What's the specific problem or decision?
+2. What have I already tried or considered?
+3. What constraints do I have?
+4. What would an ideal outcome look like?
+5. Who else is affected?
+6. Timeline for resolution?
+7. What information am I missing?
+
+Then create a prompt that helps me think through this systematically.</div>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('meta-templates')">Mark as Reviewed</button>
+            </div>
+
+            <!-- Meta-Prompt Exercise 1 -->
+            <div class="exercise-card" id="exercise-meta-1">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: linear-gradient(135deg, var(--neon-magenta), var(--neon-orange)); color: white;">1</div>
+                    <h3 class="exercise-title">Create Your First Meta-Prompt</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 15 minutes</span>
+                    <span class="meta-item"><span class="meta-icon">🛠️</span> Any AI Tool</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>🎯 Your Challenge:</h4>
+                    <ol>
+                        <li>Think of a task you do repeatedly (weekly reports, meeting agendas, status updates)</li>
+                        <li>Ask the AI: <em>"I regularly need to [YOUR TASK]. Create a meta-prompt I can use to generate optimized prompts for this task every time."</em></li>
+                        <li>Review the meta-prompt the AI creates</li>
+                        <li>Test it by answering the questions it asks</li>
+                        <li>Use the generated prompt and evaluate output</li>
+                        <li>Refine the meta-prompt based on what was missing</li>
+                    </ol>
+
+                    <div class="tip-box">
+                        <div class="tip-label">💡 Pro Tip</div>
+                        Start with a simple, frequent task. Once you see the power of meta-prompts, you'll want to create them for everything.
+                    </div>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('meta-1')">Mark Complete</button>
+            </div>
+
+            <!-- Meta-Prompt Exercise 2 -->
+            <div class="exercise-card" id="exercise-meta-2">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan)); color: white;">2</div>
+                    <h3 class="exercise-title">Meta-Prompt Improvement</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 20 minutes</span>
+                    <span class="meta-item"><span class="meta-icon">🛠️</span> Same tool as Exercise 1</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>🎯 Your Challenge:</h4>
+                    <ol>
+                        <li>Take a prompt you've used before that produced okay (but not great) results</li>
+                        <li>Ask the AI: <em>"Here's a prompt I've been using: [YOUR PROMPT]. Help me improve it by asking me questions about what I actually need, then create a better version."</em></li>
+                        <li>Answer the AI's questions thoroughly</li>
+                        <li>Compare the new prompt to your original</li>
+                        <li>Test both and evaluate the difference in output quality</li>
+                    </ol>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('meta-2')">Mark Complete</button>
+            </div>
+
+            <!-- Meta-Prompt Exercise 3 -->
+            <div class="exercise-card" id="exercise-meta-3">
+                <div class="exercise-header">
+                    <div class="exercise-number" style="background: linear-gradient(135deg, var(--neon-yellow), var(--neon-green)); color: var(--bg-dark);">3</div>
+                    <h3 class="exercise-title">Build Your Meta-Prompt Library</h3>
+                </div>
+                <div class="exercise-meta">
+                    <span class="meta-item"><span class="meta-icon">⏱️</span> 30 minutes</span>
+                    <span class="meta-item"><span class="meta-icon">🛠️</span> Any AI Tool</span>
+                </div>
+                <div class="exercise-content">
+                    <h4>🎯 Your Challenge:</h4>
+                    <ol>
+                        <li>List 3-5 types of content or tasks you create regularly</li>
+                        <li>For each one, ask the AI to create a meta-prompt</li>
+                        <li>Test each meta-prompt with a real example</li>
+                        <li>Refine based on results</li>
+                        <li>Save all final meta-prompts in a document for future use</li>
+                    </ol>
+
+                    <div class="tip-box">
+                        <div class="tip-label">💡 Pro Tip</div>
+                        Your meta-prompt library becomes more valuable over time. Each refinement makes it better. After a few months, you'll have highly optimized prompts for all common tasks.
+                    </div>
+
+                    <h4>Suggested Library Categories:</h4>
+                    <ul>
+                        <li>📧 Email & Communications</li>
+                        <li>📊 Reports & Analysis</li>
+                        <li>📝 Content & Writing</li>
+                        <li>🎯 Strategy & Planning</li>
+                        <li>🔍 Research & Learning</li>
+                    </ul>
+                </div>
+                <button class="exercise-btn start" onclick="toggleExercise('meta-3')">Mark Complete</button>
+            </div>
+
+            <!-- Remember Box -->
+            <div class="exercise-card" style="border: 2px solid var(--neon-magenta); text-align: center; padding: 3rem;">
+                <h3 style="font-family: 'Orbitron'; font-size: 1.5rem; color: var(--neon-magenta); margin-bottom: 1rem;">Remember</h3>
+                <p style="font-size: 1.3rem; color: var(--text-secondary); margin-bottom: 1rem;">When you're stuck, just ask:</p>
+                <div class="prompt-example" style="text-align: left;">
+                    <div class="prompt-label">The Universal Unstuck Prompt</div>
+                    <div class="prompt-text">"I want to [GOAL] but I'm not sure how to prompt for it effectively. Help me create the right prompt by asking me what you need to know."</div>
+                </div>
+                <p style="font-size: 1.1rem; color: var(--neon-cyan); margin-top: 1rem; font-style: italic;">The AI is your prompting partner. Let it help you write better prompts.</p>
+            </div>
+        </section>
+
+        <!-- Achievements Section -->
+        <section id="achievements" class="section">
+            <h2 style="font-family: 'Orbitron', sans-serif; font-size: 1.8rem; margin-bottom: 1.5rem; color: var(--neon-yellow);">
+                🏆 ACHIEVEMENTS
+            </h2>
+            <p style="color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem;">
+                Unlock badges as you progress through your AI training journey!
+            </p>
+
+            <div class="achievements-grid" id="achievementsGrid">
+                <div class="achievement" data-achievement="first-step">
+                    <div class="achievement-icon">🌟</div>
+                    <div class="achievement-name">First Step</div>
+                    <div class="achievement-desc">Complete your first exercise</div>
+                </div>
+                <div class="achievement" data-achievement="tool-explorer">
+                    <div class="achievement-icon">🔧</div>
+                    <div class="achievement-name">Tool Explorer</div>
+                    <div class="achievement-desc">Set up personalization for all 5 tools</div>
+                </div>
+                <div class="achievement" data-achievement="prompt-apprentice">
+                    <div class="achievement-icon">✍️</div>
+                    <div class="achievement-name">Prompt Apprentice</div>
+                    <div class="achievement-desc">Complete all prompting exercises</div>
+                </div>
+                <div class="achievement" data-achievement="meta-master">
+                    <div class="achievement-icon">🧠</div>
+                    <div class="achievement-name">Meta Master</div>
+                    <div class="achievement-desc">Complete all meta-prompt exercises</div>
+                </div>
+                <div class="achievement" data-achievement="halfway-hero">
+                    <div class="achievement-icon">⚡</div>
+                    <div class="achievement-name">Halfway Hero</div>
+                    <div class="achievement-desc">Complete 50% of all exercises</div>
+                </div>
+                <div class="achievement" data-achievement="dedicated-learner">
+                    <div class="achievement-icon">📚</div>
+                    <div class="achievement-name">Dedicated Learner</div>
+                    <div class="achievement-desc">Complete 75% of all exercises</div>
+                </div>
+                <div class="achievement" data-achievement="ai-champion">
+                    <div class="achievement-icon">🏆</div>
+                    <div class="achievement-name">AI Champion</div>
+                    <div class="achievement-desc">Complete all exercises</div>
+                </div>
+                <div class="achievement" data-achievement="speed-runner">
+                    <div class="achievement-icon">🚀</div>
+                    <div class="achievement-name">Speed Runner</div>
+                    <div class="achievement-desc">Complete 5 exercises in one session</div>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem; text-align: center;">
+                <button class="exercise-btn reset" onclick="resetProgress()" style="margin-right: 1rem;">
+                    🔄 Reset All Progress
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Tool Modals -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal" id="modalContent">
+            <button class="modal-close" onclick="closeModal()">×</button>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+    <script>
+        // State management using in-memory storage
+        let progressData = {
+            completed: [],
+            achievements: [],
+            sessionCompleted: 0
+        };
+
+        // Exercise definitions
+        const exercises = [
+            'chatgpt-personal', 'gemini-personal', 'claude-personal', 'perplexity-personal', 'notebooklm-personal',
+            'prompting-1', 'prompting-2', 'prompting-3',
+            'meta-templates', 'meta-1', 'meta-2', 'meta-3'
+        ];
+
+        const toolExercises = {
+            chatgpt: ['chatgpt-personal'],
+            gemini: ['gemini-personal'],
+            claude: ['claude-personal'],
+            perplexity: ['perplexity-personal'],
+            notebooklm: ['notebooklm-personal']
+        };
+
+        // Initialize
+        function init() {
+            loadProgress();
+            updateUI();
+            setupNavigation();
+        }
+
+        // Load progress from memory (simulating localStorage)
+        function loadProgress() {
+            // In a real implementation, this would use localStorage
+            // For this demo, we'll use sessionStorage-like behavior
+            const saved = sessionStorage.getItem('aiTrainingProgress');
+            if (saved) {
+                progressData = JSON.parse(saved);
+            }
+        }
+
+        // Save progress
+        function saveProgress() {
+            sessionStorage.setItem('aiTrainingProgress', JSON.stringify(progressData));
+        }
+
+        // Update all UI elements
+        function updateUI() {
+            updateProgressStats();
+            updateExerciseCards();
+            updateToolProgress();
+            updateAchievements();
+        }
+
+        // Update main progress stats
+        function updateProgressStats() {
+            const completed = progressData.completed.length;
+            const total = exercises.length;
+            const percent = Math.round((completed / total) * 100);
+
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('percentComplete').textContent = percent + '%';
+            document.getElementById('mainProgressFill').style.width = percent + '%';
+        }
+
+        // Update exercise card states
+        function updateExerciseCards() {
+            exercises.forEach(id => {
+                const card = document.getElementById('exercise-' + id);
+                const btn = card?.querySelector('.exercise-btn');
+
+                if (card && btn) {
+                    if (progressData.completed.includes(id)) {
+                        card.classList.add('completed');
+                        btn.textContent = 'Completed ✓';
+                        btn.classList.remove('start', 'complete');
+                        btn.classList.add('reset');
+                    } else {
+                        card.classList.remove('completed');
+                        btn.textContent = 'Mark Complete';
+                        btn.classList.remove('reset', 'complete');
+                        btn.classList.add('start');
+                    }
+                }
+            });
+        }
+
+        // Update tool progress bars
+        function updateToolProgress() {
+            Object.keys(toolExercises).forEach(tool => {
+                const toolEx = toolExercises[tool];
+                const completed = toolEx.filter(e => progressData.completed.includes(e)).length;
+                const percent = Math.round((completed / toolEx.length) * 100);
+                const bar = document.getElementById('progress-' + tool);
+                if (bar) {
+                    bar.style.width = percent + '%';
+                }
+            });
+        }
+
+        // Toggle exercise completion
+        function toggleExercise(id) {
+            if (progressData.completed.includes(id)) {
+                progressData.completed = progressData.completed.filter(e => e !== id);
+            } else {
+                progressData.completed.push(id);
+                progressData.sessionCompleted++;
+                createConfetti();
+            }
+
+            saveProgress();
+            updateUI();
+            checkAchievements();
+        }
+
+        // Check and award achievements
+        function checkAchievements() {
+            const completed = progressData.completed.length;
+            const total = exercises.length;
+            const percent = (completed / total) * 100;
+
+            // First Step
+            if (completed >= 1 && !progressData.achievements.includes('first-step')) {
+                awardAchievement('first-step');
+            }
+
+            // Tool Explorer
+            const personalExercises = ['chatgpt-personal', 'gemini-personal', 'claude-personal', 'perplexity-personal', 'notebooklm-personal'];
+            if (personalExercises.every(e => progressData.completed.includes(e)) && !progressData.achievements.includes('tool-explorer')) {
+                awardAchievement('tool-explorer');
+            }
+
+            // Prompt Apprentice
+            const promptingExercises = ['prompting-1', 'prompting-2', 'prompting-3'];
+            if (promptingExercises.every(e => progressData.completed.includes(e)) && !progressData.achievements.includes('prompt-apprentice')) {
+                awardAchievement('prompt-apprentice');
+            }
+
+            // Meta Master
+            const metaExercises = ['meta-templates', 'meta-1', 'meta-2', 'meta-3'];
+            if (metaExercises.every(e => progressData.completed.includes(e)) && !progressData.achievements.includes('meta-master')) {
+                awardAchievement('meta-master');
+            }
+
+            // Halfway Hero
+            if (percent >= 50 && !progressData.achievements.includes('halfway-hero')) {
+                awardAchievement('halfway-hero');
+            }
+
+            // Dedicated Learner
+            if (percent >= 75 && !progressData.achievements.includes('dedicated-learner')) {
+                awardAchievement('dedicated-learner');
+            }
+
+            // AI Champion
+            if (percent >= 100 && !progressData.achievements.includes('ai-champion')) {
+                awardAchievement('ai-champion');
+            }
+
+            // Speed Runner
+            if (progressData.sessionCompleted >= 5 && !progressData.achievements.includes('speed-runner')) {
+                awardAchievement('speed-runner');
+            }
+        }
+
+        // Award achievement
+        function awardAchievement(id) {
+            progressData.achievements.push(id);
+            saveProgress();
+            updateAchievements();
+
+            // Show celebration
+            createConfetti();
+            const achievement = document.querySelector(`[data-achievement="${id}"]`);
+            if (achievement) {
+                achievement.style.animation = 'none';
+                setTimeout(() => {
+                    achievement.style.animation = 'glow 0.5s ease 3';
+                }, 10);
+            }
+        }
+
+        // Update achievements display
+        function updateAchievements() {
+            progressData.achievements.forEach(id => {
+                const el = document.querySelector(`[data-achievement="${id}"]`);
+                if (el) {
+                    el.classList.add('unlocked');
+                }
+            });
+        }
+
+        // Create confetti effect
+        function createConfetti() {
+            const container = document.createElement('div');
+            container.className = 'confetti';
+            document.body.appendChild(container);
+
+            const colors = ['#00f5ff', '#ff00ff', '#f0ff00', '#00ff88', '#ff6b00', '#a855f7'];
+
+            for (let i = 0; i < 50; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                piece.style.left = Math.random() * 100 + 'vw';
+                piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+                piece.style.animationDelay = Math.random() * 0.5 + 's';
+                piece.style.animationDuration = (2 + Math.random()) + 's';
+                container.appendChild(piece);
+            }
+
+            setTimeout(() => container.remove(), 4000);
+        }
+
+        // Setup navigation
+        function setupNavigation() {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    const sectionId = tab.dataset.section;
+                    document.getElementById(sectionId).classList.add('active');
+                });
+            });
+        }
+
+        // Show tool modal
+        function showToolModal(tool) {
+            const modalBody = document.getElementById('modalBody');
+            const content = getToolModalContent(tool);
+            modalBody.innerHTML = content;
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Get tool modal content
+        function getToolModalContent(tool) {
+            const tools = {
+                chatgpt: {
+                    name: 'ChatGPT',
+                    color: '#10A37F',
+                    icon: '🤖',
+                    desc: 'Master Custom Instructions and Memory features to make ChatGPT work exactly the way you want.',
+                    features: ['Custom Instructions (2 boxes)', 'Memory feature', 'Data Controls', 'Voice settings']
+                },
+                gemini: {
+                    name: 'Gemini',
+                    color: '#4285F4',
+                    icon: '✨',
+                    desc: 'Connect your Google services and create custom Gems for specialized tasks.',
+                    features: ['Google Workspace Extension', 'Custom Gems', 'YouTube integration', 'Maps & Flights']
+                },
+                claude: {
+                    name: 'Claude',
+                    color: '#a855f7',
+                    icon: '🎭',
+                    desc: 'Create Projects with custom instructions and upload knowledge files for context-aware assistance.',
+                    features: ['Projects system', 'Project Instructions', 'Knowledge file uploads', 'Long document analysis']
+                },
+                perplexity: {
+                    name: 'Perplexity',
+                    color: '#20B2AA',
+                    icon: '🔍',
+                    desc: 'Configure your AI Profile and organize research with Collections and Spaces.',
+                    features: ['AI Profile', 'Search preferences', 'Collections', 'Spaces (Pro)']
+                },
+                notebooklm: {
+                    name: 'NotebookLM',
+                    color: '#FF6D01',
+                    icon: '📓',
+                    desc: 'Upload your documents and create audio summaries. NotebookLM only knows what you teach it.',
+                    features: ['Document uploads', 'Audio Overviews', 'Source management', 'Q&A on your docs']
+                }
+            };
+
+            const t = tools[tool];
+            return `
+                <div style="text-align: center; padding: 1rem 0;">
+                    <div style="font-size: 4rem; margin-bottom: 1rem;">${t.icon}</div>
+                    <h2 style="font-family: 'Orbitron', sans-serif; color: ${t.color}; font-size: 2rem; margin-bottom: 0.5rem;">${t.name}</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">${t.desc}</p>
+
+                    <h3 style="color: var(--text-primary); margin-bottom: 1rem; text-align: left;">Key Features to Configure:</h3>
+                    <ul style="text-align: left; color: var(--text-secondary); list-style: none; padding: 0;">
+                        ${t.features.map(f => `<li style="padding: 0.5rem 0; border-bottom: 1px solid var(--glass-border);">✓ ${f}</li>`).join('')}
+                    </ul>
+
+                    <button class="exercise-btn start" onclick="closeModal(); document.querySelector('[data-section=personalization]').click();" style="margin-top: 2rem;">
+                        Go to ${t.name} Setup →
+                    </button>
+                </div>
+            `;
+        }
+
+        // Reset progress
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                progressData = {
+                    completed: [],
+                    achievements: [],
+                    sessionCompleted: 0
+                };
+                saveProgress();
+
+                // Reset UI
+                document.querySelectorAll('.achievement').forEach(a => a.classList.remove('unlocked'));
+                updateUI();
+            }
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('modalOverlay')) {
+                closeModal();
+            }
+        });
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
