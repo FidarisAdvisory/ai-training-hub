@@ -1,24 +1,21 @@
 import base64
 import os
-<<<<<<< HEAD
-
-from googleapiclient.discovery import build
-
-=======
 import re
 
 from googleapiclient.discovery import build
 
 CLIENT_KEYWORDS = {
-    "CEMEX":   ["cemex", "rmx", "concreto"],
-    "CFP":     ["cfp", "commercial fire", "highradius", "fire protection"],
-    "DEACERO": ["deacero", "acero"],
+    "CEMEX":       ["cemex", "rmx", "concreto"],
+    "CFP":         ["cfp", "commercial fire", "highradius", "fire protection"],
+    "DEACERO":     ["deacero", "acero"],
+    "AI_TRAINING": ["ai training", "entrenamiento ia"],
 }
 
 CROSS_CLIENT_TERMS = {
-    "CEMEX":   ["deacero", "cfp", "commercial fire", "highradius"],
-    "CFP":     ["cemex", "rmx", "deacero"],
-    "DEACERO": ["cemex", "rmx", "cfp", "commercial fire"],
+    "CEMEX":       ["deacero", "cfp", "commercial fire", "highradius"],
+    "CFP":         ["cemex", "rmx", "deacero"],
+    "DEACERO":     ["cemex", "rmx", "cfp", "commercial fire"],
+    "AI_TRAINING": ["cemex", "rmx", "deacero", "cfp", "commercial fire", "highradius"],
 }
 
 
@@ -53,7 +50,6 @@ def _is_relevant(text: str, client: str) -> bool:
             return False
     return True
 
->>>>>>> origin/main
 
 def _build_gmail_service(credentials):
     return build("gmail", "v1", credentials=credentials, cache_discovery=False)
@@ -76,13 +72,6 @@ def _extract_email_text(message: dict, max_chars: int = 2000) -> str:
     return "\n".join(texts)[:max_chars]
 
 
-<<<<<<< HEAD
-def search_gmail_for_meeting(credentials, meeting: dict, user_email: str) -> list[dict]:
-    """Search Gmail inbox for emails related to this meeting's attendees and title."""
-    service = _build_gmail_service(credentials)
-    seen_ids = set()
-    results = []
-=======
 def _fetch_messages(service, query: str, seen_ids: set, results: list,
                     max_results: int = 8, client: str = "") -> None:
     """Execute a Gmail search and append deduplicated, client-filtered metadata results."""
@@ -120,60 +109,12 @@ def search_gmail_for_meeting(credentials, meeting: dict, user_email: str) -> lis
     results: list = []
     client = detect_client(meeting)
     key_terms = _extract_key_terms(meeting)
->>>>>>> origin/main
 
     attendees = [
         a["email"] for a in meeting.get("attendees", [])
         if a.get("email", "").lower() != user_email.lower()
     ]
 
-<<<<<<< HEAD
-    for email_addr in attendees[:5]:
-        query = f"(from:{email_addr} OR to:{email_addr}) newer_than:30d"
-        try:
-            resp = service.users().messages().list(userId="me", q=query, maxResults=6).execute()
-            for msg in resp.get("messages", []):
-                if msg["id"] in seen_ids:
-                    continue
-                seen_ids.add(msg["id"])
-                data = service.users().messages().get(
-                    userId="me", id=msg["id"], format="metadata",
-                    metadataHeaders=["From", "Subject", "Date"]
-                ).execute()
-                headers = {h["name"]: h["value"] for h in data.get("payload", {}).get("headers", [])}
-                results.append({
-                    "from": headers.get("From", ""),
-                    "subject": headers.get("Subject", ""),
-                    "date": headers.get("Date", ""),
-                    "snippet": data.get("snippet", "")[:250],
-                })
-        except Exception as e:
-            print(f"Gmail attendee search error ({email_addr}): {e}")
-
-    # Also search by meeting title keywords
-    keywords = " ".join(meeting.get("summary", "").split()[:4])
-    if keywords:
-        query = f'subject:"{keywords}" newer_than:60d'
-        try:
-            resp = service.users().messages().list(userId="me", q=query, maxResults=5).execute()
-            for msg in resp.get("messages", []):
-                if msg["id"] in seen_ids:
-                    continue
-                seen_ids.add(msg["id"])
-                data = service.users().messages().get(
-                    userId="me", id=msg["id"], format="metadata",
-                    metadataHeaders=["From", "Subject", "Date"]
-                ).execute()
-                headers = {h["name"]: h["value"] for h in data.get("payload", {}).get("headers", [])}
-                results.append({
-                    "from": headers.get("From", ""),
-                    "subject": headers.get("Subject", ""),
-                    "date": headers.get("Date", ""),
-                    "snippet": data.get("snippet", "")[:250],
-                })
-        except Exception as e:
-            print(f"Gmail title search error: {e}")
-=======
     # 1. Attendee email threads (90 days)
     for email_addr in attendees[:5]:
         query = f"(from:{email_addr} OR to:{email_addr}) newer_than:90d"
@@ -190,21 +131,10 @@ def search_gmail_for_meeting(credentials, meeting: dict, user_email: str) -> lis
         body_terms = " ".join(f'"{t}"' for t in key_terms[:3])
         query = f'"{client}" {body_terms} newer_than:90d'
         _fetch_messages(service, query, seen_ids, results, max_results=6, client=client)
->>>>>>> origin/main
 
     return results
 
 
-<<<<<<< HEAD
-def search_fathom_for_meeting(credentials, meeting: dict) -> list[dict]:
-    """Search the Fathom Gmail label for past meeting notes related to this meeting."""
-    service = _build_gmail_service(credentials)
-    seen_ids = set()
-    results = []
-
-    # Build search terms from attendee names and emails
-    search_terms = []
-=======
 def search_fathom_for_meeting(credentials, meeting: dict) -> list:
     """Search the Fathom Gmail label for past meeting notes related to this meeting."""
     service = _build_gmail_service(credentials)
@@ -214,40 +144,10 @@ def search_fathom_for_meeting(credentials, meeting: dict) -> list:
 
     # Build attendee name terms
     attendee_terms = []
->>>>>>> origin/main
     for attendee in meeting.get("attendees", [])[:5]:
         name = attendee.get("name", "")
         email = attendee.get("email", "")
         if name and "@" not in name:
-<<<<<<< HEAD
-            # Use last name as the most distinctive search term
-            parts = name.strip().split()
-            if parts:
-                search_terms.append(parts[-1])  # last name
-            if len(parts) > 1:
-                search_terms.append(parts[0])   # first name as backup
-        elif email:
-            local = email.split("@")[0]
-            if len(local) > 3:
-                search_terms.append(local)
-
-    # Also include meeting title keywords as fallback
-    title_words = [w for w in meeting.get("summary", "").split() if len(w) > 4]
-    search_terms.extend(title_words[:2])
-
-    # Dedupe while preserving order
-    seen_terms: set = set()
-    unique_terms = []
-    for t in search_terms:
-        if t.lower() not in seen_terms:
-            seen_terms.add(t.lower())
-            unique_terms.append(t)
-
-    for term in unique_terms[:4]:
-        query = f'label:Fathom "{term}"'
-        try:
-            resp = service.users().messages().list(userId="me", q=query, maxResults=5).execute()
-=======
             parts = name.strip().split()
             if parts:
                 attendee_terms.append(parts[-1])   # last name (most distinctive)
@@ -276,37 +176,14 @@ def search_fathom_for_meeting(credentials, meeting: dict) -> list:
             resp = service.users().messages().list(
                 userId="me", q=query, maxResults=5
             ).execute()
->>>>>>> origin/main
             for msg in resp.get("messages", []):
                 if msg["id"] in seen_ids:
                     continue
                 seen_ids.add(msg["id"])
-<<<<<<< HEAD
-                # Fetch full body — Fathom notes contain the actual transcript/summary
-=======
->>>>>>> origin/main
                 data = service.users().messages().get(
                     userId="me", id=msg["id"], format="full"
                 ).execute()
                 headers = {h["name"]: h["value"] for h in data.get("payload", {}).get("headers", [])}
-<<<<<<< HEAD
-                body = _extract_email_text(data, max_chars=2000)
-                results.append({
-                    "subject": headers.get("Subject", ""),
-                    "date": headers.get("Date", ""),
-                    "body": body or data.get("snippet", "")[:500],
-                })
-                print(f"  Fathom note found: {headers.get('Subject', '')[:60]}")
-        except Exception as e:
-            print(f"Fathom search error ({term}): {e}")
-
-    print(f"  Fathom: {len(results)} note(s) found")
-    return results
-
-
-def search_notion_for_meeting(meeting: dict) -> list[dict]:
-    """Search Notion for meeting notes related to this meeting by title and attendee names."""
-=======
                 subject = headers.get("Subject", "")
                 body = _extract_email_text(data, max_chars=2000)
                 if not _is_relevant(subject + " " + body[:500], client):
@@ -327,39 +204,12 @@ def search_notion_for_meeting(meeting: dict) -> list[dict]:
 
 def search_notion_for_meeting(meeting: dict) -> list:
     """Search Notion for pages related to this meeting by title and client context."""
->>>>>>> origin/main
     token = os.environ.get("NOTION_API_TOKEN")
     if not token:
         return []
 
     try:
         from notion_client import Client
-<<<<<<< HEAD
-        client = Client(auth=token)
-    except ImportError:
-        return []
-
-    # Search by meeting title AND each attendee's name
-    queries = []
-    title = meeting.get("summary", "").strip()
-    if title:
-        queries.append(title)
-
-    for attendee in meeting.get("attendees", [])[:4]:
-        name = attendee.get("name", "")
-        if name and "@" not in name and len(name) > 3:
-            queries.append(name)
-
-    seen_urls: set = set()
-    pages = []
-
-    for query in queries[:5]:
-        try:
-            results = client.search(
-                query=query,
-                filter={"property": "object", "value": "page"},
-                page_size=5,
-=======
         notion_client = Client(auth=token)
     except ImportError:
         return []
@@ -386,7 +236,6 @@ def search_notion_for_meeting(meeting: dict) -> list:
                 query=query,
                 filter={"property": "object", "value": "page"},
                 page_size=8,
->>>>>>> origin/main
             ).get("results", [])
 
             for page in results:
@@ -399,17 +248,12 @@ def search_notion_for_meeting(meeting: dict) -> list:
                 page_title = ""
                 for prop in props.values():
                     if prop.get("type") == "title":
-<<<<<<< HEAD
-                        page_title = "".join(t.get("plain_text", "") for t in prop.get("title", []))
-                        break
-=======
                         page_title = "".join(
                             t.get("plain_text", "") for t in prop.get("title", [])
                         )
                         break
                 if not _is_relevant(page_title, client):
                     continue
->>>>>>> origin/main
                 pages.append({
                     "title": page_title or "Untitled",
                     "url": url,
@@ -424,14 +268,11 @@ def search_notion_for_meeting(meeting: dict) -> list:
 def research_meeting(credentials, meeting: dict) -> dict:
     """Gather all context for a meeting from Gmail inbox, Fathom notes, and Notion."""
     user_email = os.environ.get("USER_EMAIL", os.environ.get("RECIPIENT_EMAIL", ""))
-<<<<<<< HEAD
-=======
     client = detect_client(meeting)
     if client:
         print(f"  Detected client context: {client}")
     else:
         print("  No specific client detected — broad search mode")
->>>>>>> origin/main
 
     print("  Searching Gmail for relevant emails...")
     emails = search_gmail_for_meeting(credentials, meeting, user_email)
@@ -440,11 +281,7 @@ def research_meeting(credentials, meeting: dict) -> dict:
     print("  Searching Fathom folder for past meeting notes...")
     fathom_notes = search_fathom_for_meeting(credentials, meeting)
 
-<<<<<<< HEAD
-    print("  Searching Notion for relevant notes and meeting pages...")
-=======
     print("  Searching Notion for relevant notes and pages...")
->>>>>>> origin/main
     notion_pages = search_notion_for_meeting(meeting)
     print(f"  Found {len(notion_pages)} Notion page(s)")
 
@@ -452,8 +289,5 @@ def research_meeting(credentials, meeting: dict) -> dict:
         "emails": emails,
         "fathom_notes": fathom_notes,
         "notion_pages": notion_pages,
-<<<<<<< HEAD
-=======
         "detected_client": client,
->>>>>>> origin/main
     }
