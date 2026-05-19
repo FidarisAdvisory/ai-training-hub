@@ -123,3 +123,45 @@ def send_digest(credentials, recipient: str, digest_html: str, today_date: str) 
     raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
     service.users().messages().send(userId="me", body={"raw": raw}).execute()
     print(f"Email sent to {recipient}: {subject}")
+
+
+def send_action_items_digest(
+    credentials, recipient: str, digest_html: str, today_date: str
+) -> None:
+    """Build and send the 6 PM action-items digest email via Gmail API."""
+    service = _build_service(credentials)
+
+    subject = f"📋 Daily Action Items Digest — {today_date}"
+
+    full_html = f"""<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:680px;margin:24px auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+    <div style="background:#1e3a5f;padding:20px 28px;">
+      <p style="margin:0;color:#a8c4e0;font-size:12px;letter-spacing:1px;text-transform:uppercase;">Daily Action Items Digest</p>
+      <h1 style="margin:4px 0 0;color:#ffffff;font-size:20px;font-weight:600;">{today_date}</h1>
+    </div>
+    <div style="padding:24px 28px;color:#2d3748;font-size:14px;line-height:1.6;">
+      {digest_html}
+    </div>
+    <div style="padding:16px 28px;background:#f8f9fb;border-top:1px solid #e8ecf0;">
+      <p style="margin:0;color:#9aa5b4;font-size:12px;">Sent automatically at 6 PM CT by your Daily Action Items Agent &mdash; Fidaris Advisory</p>
+    </div>
+  </div>
+</body>
+</html>"""
+
+    plain_text = _strip_html(full_html)
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["To"] = recipient
+    msg["From"] = f"Action Items Agent <{os.environ.get('USER_EMAIL', recipient)}>"
+
+    msg.attach(MIMEText(plain_text, "plain"))
+    msg.attach(MIMEText(full_html, "html"))
+
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+    service.users().messages().send(userId="me", body={"raw": raw}).execute()
+    print(f"Email sent to {recipient}: {subject}")
