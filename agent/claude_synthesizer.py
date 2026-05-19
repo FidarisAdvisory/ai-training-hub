@@ -28,12 +28,14 @@ INSTRUCTIONS:
    - Confirm meetings with an existing prep block.
 
 5. REVENUE & PIPELINE
-   - Show month-to-date earned revenue per client with the formula: hours x rate = $amount.
-   - Show total earned and whether the pace is ahead or behind the month progress.
-     Example: "Day 13 of 31 (42% of month) — Revenue is $X which is Y% of a typical monthly target."
+   - ALWAYS include this section, no matter what the values are.
+   - If revenue data is "(not available)": write "⚠️ Revenue data not configured — verify NOTION_API_TOKEN is set in GitHub secrets and that the Notion integration is connected to the CEMEX, CFP, and DEACERO time log databases."
+   - If revenue data is present (even if $0): show the per-client breakdown (hours × rate = amount), total MTD, and pace vs month progress.
+   - If a client shows 0 hours, just display it as 0 hrs × rate = $0.
+   - If access_errors are listed in the data, show them as a warning: "⚠️ Could not access: {error list} — open Notion, go to each database, click ··· → Connections → add your integration."
    - Show total active AI training pipeline value and number of active leads.
    - List HIGH priority leads only, with: name, company, stage, value, next action, and due date.
-   - If no revenue data: skip this section gracefully.
+   - If pipeline shows 0 leads, write "(no active high-priority leads)".
 
 6. SUGGESTED FOCUS BLOCK
    - Best open window today for deep work, with a specific suggestion.

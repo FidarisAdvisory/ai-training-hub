@@ -8,8 +8,8 @@ def get_notion_tasks(today_date: str, tomorrow_date: str) -> dict:
     Returns {"today": [...], "tomorrow": [...]} or empty lists if Notion is not configured.
 
     Expects these env vars:
-      NOTION_API_TOKEN   — Notion integration secret
-      NOTION_DATABASE_ID — ID of the tasks database
+      NOTION_API_TOKEN   - Notion integration secret
+      NOTION_DATABASE_ID - ID of the tasks database
     The database must have a Date property (any name containing "date" or "due") and
     a Title property. Optionally: Status and Priority select/status properties.
     """

@@ -28,7 +28,7 @@ def main() -> None:
     print(f"  Today: {len(notion_data['today'])} tasks, Tomorrow: {len(notion_data['tomorrow'])} tasks")
 
     print("Fetching revenue & pipeline data...")
-    revenue_data = get_monthly_revenue()
+    revenue_data = get_monthly_revenue(credentials)
 
     print("Scanning for unanswered emails...")
     unanswered = get_unanswered_requests(credentials, user_email)
