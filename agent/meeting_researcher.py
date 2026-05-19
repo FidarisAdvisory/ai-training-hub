@@ -5,15 +5,17 @@ import re
 from googleapiclient.discovery import build
 
 CLIENT_KEYWORDS = {
-    "CEMEX":   ["cemex", "rmx", "concreto"],
-    "CFP":     ["cfp", "commercial fire", "highradius", "fire protection"],
-    "DEACERO": ["deacero", "acero"],
+    "CEMEX":       ["cemex", "rmx", "concreto"],
+    "CFP":         ["cfp", "commercial fire", "highradius", "fire protection"],
+    "DEACERO":     ["deacero", "acero"],
+    "AI_TRAINING": ["ai training", "entrenamiento ia"],
 }
 
 CROSS_CLIENT_TERMS = {
-    "CEMEX":   ["deacero", "cfp", "commercial fire", "highradius"],
-    "CFP":     ["cemex", "rmx", "deacero"],
-    "DEACERO": ["cemex", "rmx", "cfp", "commercial fire"],
+    "CEMEX":       ["deacero", "cfp", "commercial fire", "highradius"],
+    "CFP":         ["cemex", "rmx", "deacero"],
+    "DEACERO":     ["cemex", "rmx", "cfp", "commercial fire"],
+    "AI_TRAINING": ["cemex", "rmx", "deacero", "cfp", "commercial fire", "highradius"],
 }
 
 
