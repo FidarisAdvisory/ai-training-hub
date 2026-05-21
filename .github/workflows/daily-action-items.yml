@@ -1,0 +1,75 @@
+name: Daily Action Items Digest
+
+on:
+  schedule:
+    # 6:00 PM CDT = 23:00 UTC (summer DST)
+    # 6:00 PM CST = 00:00 UTC (winter)
+    # Using 23:00 UTC as primary trigger (adjust to 00:00 UTC Nov–Mar)
+    - cron: '0 23 * * *'
+  workflow_dispatch:  # Allow manual trigger for testing
+
+jobs:
+  send-daily-digest:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Daily Action Items Digest
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet-4-6
+          timeout_minutes: 15
+          mcp_config: |
+            {
+              "mcpServers": {
+                "Fathom": {
+                  "command": "npx",
+                  "args": ["-y", "fathom-mcp"],
+                  "env": {
+                    "FATHOM_API_KEY": "${{ secrets.FATHOM_API_KEY }}"
+                  }
+                },
+                "Notion": {
+                  "command": "npx",
+                  "args": ["-y", "@notionhq/notion-mcp-server"],
+                  "env": {
+                    "OPENAPI_MCP_HEADERS": "{\"Authorization\": \"Bearer ${{ secrets.NOTION_API_KEY }}\"}"
+                  }
+                },
+                "Gmail": {
+                  "command": "npx",
+                  "args": ["-y", "mcp-server-gmail"],
+                  "env": {
+                    "GMAIL_OAUTH_CLIENT_ID": "${{ secrets.GMAIL_OAUTH_CLIENT_ID }}",
+                    "GMAIL_OAUTH_CLIENT_SECRET": "${{ secrets.GMAIL_OAUTH_CLIENT_SECRET }}",
+                    "GMAIL_OAUTH_REFRESH_TOKEN": "${{ secrets.GMAIL_OAUTH_REFRESH_TOKEN }}"
+                  }
+                }
+              }
+            }
+          prompt: |
+            Today is $(date +"%B %d, %Y"). The user's email is fidelsalazar@fidarisadvisory.com and their name is Fidel Salazar.
+
+            Your task is to compile a daily action items email digest and create a Gmail draft to fidelsalazar@fidarisadvisory.com.
+
+            Steps:
+            1. Call mcp__Fathom__list_meetings with include_action_items=true, include_summary=true, max_pages=3 to get recent meetings from the last ~30 days.
+            2. Call mcp__Notion__notion-query-meeting-notes to get recent Notion meeting notes.
+            3. Search Notion for standalone action item tasks created in the last 7 days.
+            4. Separate all action items into two groups:
+               A. Items assigned to Fidel Salazar (the user)
+               B. Items assigned to other people
+            5. For each group, organize by project (HighRadius/CFP, CEMEX Alpha P2P, LSU Healthcare, AI Training clients, Fidaris Business Development, etc.)
+            6. Create a Gmail draft using mcp__Gmail__create_draft with:
+               - to: ["fidelsalazar@fidarisadvisory.com"]
+               - subject: "📋 Daily Action Items Digest — [today's date]"
+               - A clean, professional HTML email with two main sections:
+                 * "Your Action Items" (Fidel's tasks, organized by project with meeting name and date)
+                 * "Other People's Action Items" (tasks assigned to others, with person name, project, and date)
+
+            Focus on meetings from the last 30 days. For each action item include: the task description, the meeting/source it came from, and the date.
+
+            Create the Gmail draft when done. Do not print the full email content to stdout — just confirm the draft was created.
