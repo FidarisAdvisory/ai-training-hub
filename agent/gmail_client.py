@@ -123,3 +123,24 @@ def send_digest(credentials, recipient: str, digest_html: str, today_date: str) 
     raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
     service.users().messages().send(userId="me", body={"raw": raw}).execute()
     print(f"Email sent to {recipient}: {subject}")
+
+
+def send_action_items_digest(credentials, recipient: str, digest_html: str, today_date: str) -> None:
+    """Build and send the 6 PM action items digest email via Gmail API."""
+    service = _build_service(credentials)
+
+    subject = f"Action Items Digest — {today_date}"
+    full_html = _build_html_wrapper(digest_html, today_date)
+    plain_text = _strip_html(full_html)
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["To"] = recipient
+    msg["From"] = f"Action Items Agent <{os.environ.get('USER_EMAIL', recipient)}>"
+
+    msg.attach(MIMEText(plain_text, "plain"))
+    msg.attach(MIMEText(full_html, "html"))
+
+    raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+    service.users().messages().send(userId="me", body={"raw": raw}).execute()
+    print(f"Email sent to {recipient}: {subject}")
