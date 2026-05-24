@@ -1,0 +1,39 @@
+name: Daily Action Items Digest
+
+on:
+  # Runs at 6 PM CDT (UTC-5) = 23:00 UTC / 6 PM CST (UTC-6) = 00:00 UTC next day
+  # Schedule covers both CDT (summer) and CST (winter):
+  schedule:
+    - cron: "0 23 * * *"   # 6 PM CDT (Mar–Nov)
+    - cron: "0 0 * * *"    # 6 PM CST (Nov–Mar)
+
+  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
+
+jobs:
+  send-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run daily digest
+        env:
+          FATHOM_API_KEY:     ${{ secrets.FATHOM_API_KEY }}
+          NOTION_API_KEY:     ${{ secrets.NOTION_API_KEY }}
+          NOTION_MEETINGS_DB: ${{ secrets.NOTION_MEETINGS_DB }}
+          GMAIL_SENDER:       ${{ secrets.GMAIL_SENDER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          DIGEST_RECIPIENT:   ${{ secrets.DIGEST_RECIPIENT }}
+        run: python scripts/daily_action_items.py
