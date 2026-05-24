@@ -11,6 +11,15 @@ CLIENT_KEYWORDS = {
     "AI_TRAINING": ["ai training", "entrenamiento ia"],
 }
 
+# What to actually search for in Gmail/Fathom/Notion (empty = no company-name scoping)
+CLIENT_SEARCH_NAMES = {
+    "CEMEX":       "CEMEX",
+    "CFP":         "CFP",
+    "DEACERO":     "DEACERO",
+    "AI_TRAINING": "",  # no single company name — rely on attendees + title keywords
+}
+
+# Terms that indicate a result belongs to a *different* client (used to filter junk)
 CROSS_CLIENT_TERMS = {
     "CEMEX":       ["deacero", "cfp", "commercial fire", "highradius"],
     "CFP":         ["cemex", "rmx", "deacero"],
@@ -20,7 +29,7 @@ CROSS_CLIENT_TERMS = {
 
 
 def detect_client(meeting: dict) -> str:
-    """Detect which client this meeting is about from title, description, and attendee emails."""
+    """Detect which client/context this meeting belongs to."""
     text = (
         meeting.get("summary", "") + " " +
         meeting.get("description", "") + " " +
@@ -35,7 +44,8 @@ def detect_client(meeting: dict) -> str:
 def _extract_key_terms(meeting: dict) -> list:
     """Extract significant words from the meeting title."""
     stopwords = {"the", "and", "for", "with", "from", "that", "this", "are", "was",
-                 "its", "at", "in", "on", "a", "an", "of", "to", "by"}
+                 "its", "at", "in", "on", "a", "an", "of", "to", "by", "de", "la",
+                 "el", "los", "las", "con", "para", "del"}
     words = re.sub(r"[^\w\s]", " ", meeting.get("summary", "")).split()
     return [w for w in words if len(w) > 3 and w.lower() not in stopwords]
 
@@ -108,6 +118,7 @@ def search_gmail_for_meeting(credentials, meeting: dict, user_email: str) -> lis
     seen_ids: set = set()
     results: list = []
     client = detect_client(meeting)
+    search_name = CLIENT_SEARCH_NAMES.get(client, client)
     key_terms = _extract_key_terms(meeting)
 
     attendees = [
@@ -115,10 +126,17 @@ def search_gmail_for_meeting(credentials, meeting: dict, user_email: str) -> lis
         if a.get("email", "").lower() != user_email.lower()
     ]
 
-    # 1. Attendee email threads (90 days)
+    # 1. Attendee email threads scoped to company name when available (90 days)
     for email_addr in attendees[:5]:
-        query = f"(from:{email_addr} OR to:{email_addr}) newer_than:90d"
-        _fetch_messages(service, query, seen_ids, results, max_results=8, client=client)
+        if search_name:
+            query = f'(from:{email_addr} OR to:{email_addr}) "{search_name}" newer_than:90d'
+            _fetch_messages(service, query, seen_ids, results, max_results=8, client=client)
+            # Also without company name to catch threads that don't mention it
+            query = f"(from:{email_addr} OR to:{email_addr}) newer_than:90d"
+            _fetch_messages(service, query, seen_ids, results, max_results=5, client=client)
+        else:
+            query = f"(from:{email_addr} OR to:{email_addr}) newer_than:90d"
+            _fetch_messages(service, query, seen_ids, results, max_results=8, client=client)
 
     # 2. Meeting title keywords in subject (90 days)
     if key_terms:
@@ -126,10 +144,10 @@ def search_gmail_for_meeting(credentials, meeting: dict, user_email: str) -> lis
         query = f"subject:({kw_query}) newer_than:90d"
         _fetch_messages(service, query, seen_ids, results, max_results=8, client=client)
 
-    # 3. Client name + key terms in body — catches threads not caught by attendee search
-    if client and key_terms:
+    # 3. Company name + key terms anywhere in body (only for named clients)
+    if search_name and key_terms:
         body_terms = " ".join(f'"{t}"' for t in key_terms[:3])
-        query = f'"{client}" {body_terms} newer_than:90d'
+        query = f'"{search_name}" {body_terms} newer_than:90d'
         _fetch_messages(service, query, seen_ids, results, max_results=6, client=client)
 
     return results
@@ -141,6 +159,8 @@ def search_fathom_for_meeting(credentials, meeting: dict) -> list:
     seen_ids: set = set()
     results: list = []
     client = detect_client(meeting)
+    search_name = CLIENT_SEARCH_NAMES.get(client, client)
+    key_terms = _extract_key_terms(meeting)
 
     # Build attendee name terms
     attendee_terms = []
@@ -150,28 +170,41 @@ def search_fathom_for_meeting(credentials, meeting: dict) -> list:
         if name and "@" not in name:
             parts = name.strip().split()
             if parts:
-                attendee_terms.append(parts[-1])   # last name (most distinctive)
+                attendee_terms.append(parts[-1])   # last name most distinctive
             if len(parts) > 1:
-                attendee_terms.append(parts[0])    # first name as backup
+                attendee_terms.append(parts[0])
         elif email:
             local = email.split("@")[0]
             if len(local) > 3:
                 attendee_terms.append(local)
 
-    # Build queries: prefer attendee name + client (precise), then each alone
     queries = []
-    if attendee_terms and client:
-        for term in attendee_terms[:3]:
-            queries.append(f'label:Fathom "{term}" "{client}"')
-        for term in attendee_terms[:2]:
-            queries.append(f'label:Fathom "{term}"')
-    elif attendee_terms:
-        for term in attendee_terms[:4]:
-            queries.append(f'label:Fathom "{term}"')
-    if client:
-        queries.append(f'label:Fathom "{client}"')
 
-    for query in queries[:6]:
+    # Most precise: attendee last name + company name
+    if attendee_terms and search_name:
+        for term in attendee_terms[:3]:
+            queries.append(f'label:Fathom "{term}" "{search_name}"')
+
+    # Company + meeting topic keyword (catches sessions where attendee name isn't in notes)
+    if search_name and key_terms:
+        queries.append(f'label:Fathom "{search_name}" "{key_terms[0]}"')
+
+    # Attendee name alone as fallback
+    for term in attendee_terms[:3]:
+        queries.append(f'label:Fathom "{term}"')
+
+    # For AI training meetings: also search by the topic phrases
+    if client == "AI_TRAINING":
+        queries.append('label:Fathom "ai training"')
+        queries.append('label:Fathom "entrenamiento ia"')
+        if key_terms:
+            queries.append(f'label:Fathom "{key_terms[0]}"')
+
+    # Company name alone as last resort (broad)
+    if search_name:
+        queries.append(f'label:Fathom "{search_name}"')
+
+    for query in queries[:7]:
         try:
             resp = service.users().messages().list(
                 userId="me", q=query, maxResults=5
@@ -215,22 +248,25 @@ def search_notion_for_meeting(meeting: dict) -> list:
         return []
 
     client = detect_client(meeting)
+    search_name = CLIENT_SEARCH_NAMES.get(client, client)
     key_terms = _extract_key_terms(meeting)
     title = meeting.get("summary", "").strip()
 
     # Queries from most-specific to least-specific
     queries = []
     if title:
-        queries.append(title)
-    if client and key_terms:
-        queries.append(f"{client} {' '.join(key_terms[:3])}")
-    if client:
-        queries.append(client)
+        queries.append(title)                                      # exact meeting title
+    if search_name and key_terms:
+        queries.append(f"{search_name} {' '.join(key_terms[:3])}")  # company + topic
+    if key_terms:
+        queries.append(" ".join(key_terms[:3]))                    # topic keywords alone
+    if search_name:
+        queries.append(search_name)                                # company name alone
 
     seen_urls: set = set()
     pages: list = []
 
-    for query in queries[:4]:
+    for query in queries[:5]:
         try:
             results = notion_client.search(
                 query=query,
@@ -269,8 +305,10 @@ def research_meeting(credentials, meeting: dict) -> dict:
     """Gather all context for a meeting from Gmail inbox, Fathom notes, and Notion."""
     user_email = os.environ.get("USER_EMAIL", os.environ.get("RECIPIENT_EMAIL", ""))
     client = detect_client(meeting)
+    search_name = CLIENT_SEARCH_NAMES.get(client, "")
     if client:
-        print(f"  Detected client context: {client}")
+        label = f"{client}" + (f" (searching as '{search_name}')" if search_name else " (attendee + title search)")
+        print(f"  Detected client context: {label}")
     else:
         print("  No specific client detected — broad search mode")
 
