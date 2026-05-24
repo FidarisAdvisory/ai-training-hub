@@ -90,9 +90,12 @@ def synthesize_pre_meeting_briefing(meeting: dict, research: dict) -> str:
     fathom_notes = research.get("fathom_notes", [])
     emails = research.get("emails", [])
     notion_pages = research.get("notion_pages", [])
+    detected_client = research.get("detected_client", "")
 
     user_message = f"""MEETING DETAILS:
 {json.dumps(meeting, indent=2)}
+
+DETECTED CLIENT CONTEXT: {detected_client if detected_client else "Unknown / General"}
 
 PAST FATHOM MEETING NOTES ({len(fathom_notes)} session(s) found):
 {json.dumps(fathom_notes, indent=2) if fathom_notes else '(none found)'}
