@@ -139,6 +139,15 @@ def main() -> None:
     for meeting in meetings:
         print(f"Found: {meeting['summary']} at {meeting['start']}")
 
+        # Skip solo blocks and internal placeholders — only brief meetings with real guests
+        external_attendees = [
+            a for a in meeting["attendees"]
+            if a["email"].lower() != recipient.lower()
+        ]
+        if not external_attendees:
+            print("  No external attendees — skipping.")
+            continue
+
         if was_briefing_sent(credentials, meeting["event_id"], today_str):
             print("  Briefing already sent today. Skipping.")
             continue
