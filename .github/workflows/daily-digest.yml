@@ -1,0 +1,87 @@
+name: Daily Action Items Digest
+
+# Runs every weekday at 6 PM Central Time
+# CDT (Mar–Nov): UTC-5 → 23:00 UTC
+# CST (Nov–Mar): UTC-6 → 00:00 UTC next day
+# Adjust the cron line below when switching between CDT and CST
+on:
+  schedule:
+    - cron: '0 23 * * 1-5'   # 6 PM CDT (Mon–Fri); change to '0 0 * * 2-6' for CST
+  workflow_dispatch:          # Also allows manual trigger from GitHub Actions UI
+
+jobs:
+  daily-digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Claude Code CLI
+        run: npm install -g @anthropic-ai/claude-code
+
+      # ── Configure MCP Servers ──────────────────────────────────────────────
+      # Each `claude mcp add` command registers an MCP server for this session.
+      # Replace the placeholder package names and env vars with the ones that
+      # match your actual MCP server setup (check your local ~/.claude/settings.json
+      # to find the exact command/args/env used in your interactive sessions).
+      #
+      # Required GitHub Secrets (Settings → Secrets → Actions):
+      #   ANTHROPIC_API_KEY   — your Anthropic API key
+      #   FATHOM_API_TOKEN    — Fathom OAuth/API token
+      #   NOTION_API_KEY      — Notion internal integration token
+      #   GMAIL_OAUTH_TOKEN   — Gmail OAuth refresh token (JSON)
+      # ─────────────────────────────────────────────────────────────────────
+
+      - name: Configure Fathom MCP server
+        run: |
+          claude mcp add Fathom \
+            --transport stdio \
+            npx -y @anthropic-ai/fathom-mcp-server
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FATHOM_API_TOKEN: ${{ secrets.FATHOM_API_TOKEN }}
+
+      - name: Configure Notion MCP server
+        run: |
+          claude mcp add Notion \
+            --transport stdio \
+            npx -y @notionhq/notion-mcp-server
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+
+      - name: Configure Gmail MCP server
+        run: |
+          claude mcp add Gmail \
+            --transport stdio \
+            npx -y @anthropic-ai/gmail-mcp-server
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GMAIL_OAUTH_TOKEN: ${{ secrets.GMAIL_OAUTH_TOKEN }}
+
+      # ── Run the digest ────────────────────────────────────────────────────
+      - name: Run daily action items digest
+        run: |
+          claude --print \
+            --allowedTools "mcp__Fathom__*,mcp__Notion__*,mcp__Gmail__*" \
+            "$(cat .claude/commands/daily-digest.md)"
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          FATHOM_API_TOKEN: ${{ secrets.FATHOM_API_TOKEN }}
+          NOTION_API_KEY: ${{ secrets.NOTION_API_KEY }}
+          GMAIL_OAUTH_TOKEN: ${{ secrets.GMAIL_OAUTH_TOKEN }}
+
+      - name: Confirm completion
+        if: success()
+        run: echo "✅ Daily digest draft created in Gmail. Check fidelsalazar@fidarisadvisory.com drafts."
+
+      - name: Notify on failure
+        if: failure()
+        run: echo "❌ Daily digest failed. Check the run logs above."
